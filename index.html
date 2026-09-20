@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Perekam Layar - Karya Adiatma</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Animasi background untuk menonjolkan efek kaca */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Efek Glassmorphism Utama */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+        }
+
+        /* Efek Input / Select bergaya kaca */
+        .glass-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            backdrop-filter: blur(5px);
+        }
+        
+        .glass-input option {
+            background: #2c3e50;
+            color: #fff;
+        }
+
+        /* Tombol Glossy */
+        .glossy-btn {
+            background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.05) 100%);
+            border: 1px solid rgba(255,255,255,0.4);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Efek kilauan cermin pada tombol */
+        .glossy-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+            transform: skewX(-25deg);
+            transition: all 0.5s ease;
+        }
+
+        .glossy-btn:hover:not(:disabled)::before {
+            left: 200%;
+        }
+
+        .glossy-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .glossy-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.5); }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center p-4">
+
+    <!-- Judul Aplikasi -->
+    <div class="text-center mb-6 mt-4">
+        <h1 class="text-3xl md:text-4xl font-bold tracking-wider drop-shadow-lg" style="text-shadow: 0 2px 10px rgba(0,0,0,0.3);">
+            APLIKASI-APLIKASI KARYA ADIATMA
+        </h1>
+        <p class="text-white/80 mt-2 font-light">Perekam Layar, Kamera, & Audio Kualitas Tinggi</p>
+    </div>
+
+    <!-- Kontainer Kaca Utama -->
+    <main class="glass-panel w-full max-w-md rounded-3xl p-6 flex flex-col gap-5 relative z-10">
+        
+        <!-- Peringatan Mobile -->
+        <div class="glass-panel rounded-xl p-3 text-xs flex items-start gap-3 border-l-4 border-yellow-300 bg-white/5">
+            <i class="fas fa-info-circle text-yellow-300 mt-0.5 text-base"></i>
+            <p class="text-white/90"><strong>Info:</strong> Rekam Layar mungkin tidak didukung di beberapa browser HP bawaan. Gunakan mode Kamera/Audio jika terkendala.</p>
+        </div>
+
+        <!-- Pengaturan -->
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-white/90 mb-1 ml-1 drop-shadow-sm">Mode Perekaman</label>
+                <select id="modeSelect" class="w-full glass-input rounded-xl focus:outline-none focus:ring-2 focus:ring-white/50 p-3 transition-all appearance-none cursor-pointer">
+                    <option value="screen">🖥️ Rekam Layar (+ Audio)</option>
+                    <option value="camera">📷 Rekam Kamera (+ Audio)</option>
+                    <option value="audio">🎙️ Hanya Audio</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-white/90 mb-1 ml-1 drop-shadow-sm">Kualitas Resolusi</label>
+                <select id="qualitySelect" class="w-full glass-input rounded-xl focus:outline-none focus:ring-2 focus:ring-white/50 p-3 transition-all appearance-none cursor-pointer">
+                    <option value="high">Tinggi (HD - Kualitas Terbaik)</option>
+                    <option value="medium" selected>Sedang (Standar)</option>
+                    <option value="low">Rendah (Hemat Memori)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Area Preview -->
+        <div>
+            <label class="block text-sm font-medium text-white/90 mb-1 ml-1 drop-shadow-sm">Live Preview</label>
+            <div class="relative w-full aspect-video glass-panel rounded-2xl overflow-hidden flex items-center justify-center border border-white/20">
+                <video id="livePreview" autoplay muted playsinline class="w-full h-full object-contain hidden backdrop-blur-sm"></video>
+                
+                <div id="audioVisualizer" class="hidden flex flex-col items-center justify-center w-full h-full bg-black/20">
+                    <i class="fas fa-microphone-lines text-5xl mb-3 text-white/80 animate-pulse"></i>
+                    <span class="text-sm font-light text-white/80 tracking-widest">MEREKAM AUDIO...</span>
+                </div>
+                
+                <div id="idleState" class="flex flex-col items-center justify-center w-full h-full bg-black/10">
+                    <i class="fas fa-expand text-4xl mb-3 text-white/50"></i>
+                    <span class="text-sm text-white/60">Siap Merekam</span>
+                </div>
+                
+                <!-- Indikator REC -->
+                <div id="recordingIndicator" class="absolute top-3 right-3 flex items-center gap-2 bg-red-500/80 backdrop-blur-md text-white text-xs px-3 py-1.5 rounded-full hidden border border-red-400/50 shadow-[0_0_10px_rgba(239,68,68,0.5)]">
+                    <span class="w-2.5 h-2.5 rounded-full bg-white animate-pulse"></span> REC
+                </div>
+            </div>
+        </div>
+
+        <!-- Tombol Aksi -->
+        <div class="grid grid-cols-2 gap-3 mt-2">
+            <button id="btnStart" class="glossy-btn text-white font-medium py-3 rounded-xl flex items-center justify-center gap-2">
+                <i class="fas fa-play"></i> Mulai
+            </button>
+            <button id="btnStop" disabled class="glossy-btn text-white font-medium py-3 rounded-xl flex items-center justify-center gap-2 !bg-red-500/40 hover:!bg-red-500/60 border-red-500/50">
+                <i class="fas fa-stop"></i> Berhenti
+            </button>
+            <button id="btnScreenshot" class="glossy-btn text-white font-medium py-3 rounded-xl flex items-center justify-center gap-2 col-span-2">
+                <i class="fas fa-camera-retro"></i> Tangkap Layar (Screenshot)
+            </button>
+        </div>
+
+        <!-- Area Hasil -->
+        <div id="resultArea" class="glass-panel p-4 rounded-2xl mt-2 hidden border border-green-400/30">
+            <h3 class="text-sm font-semibold text-white/90 mb-3 flex items-center gap-2">
+                <i class="fas fa-check-circle text-green-400"></i> Hasil Rekaman
+            </h3>
+            
+            <div class="bg-black/40 rounded-xl overflow-hidden mb-4 aspect-video flex items-center justify-center relative backdrop-blur-md">
+                <video id="resultVideo" controls playsinline class="w-full h-full hidden"></video>
+                <audio id="resultAudio" controls class="w-full px-4 hidden"></audio>
+                <img id="resultImage" class="w-full h-full object-contain hidden" alt="Screenshot Result">
+            </div>
+
+            <div class="flex gap-3">
+                <button id="btnReset" class="flex-1 glossy-btn text-white font-medium py-2.5 rounded-xl flex items-center justify-center gap-2">
+                    <i class="fas fa-redo"></i> Reset
+                </button>
+                <button id="btnSave" class="flex-1 glossy-btn text-white font-medium py-2.5 rounded-xl flex items-center justify-center gap-2 !bg-green-500/40 hover:!bg-green-500/60 border-green-500/50">
+                    <i class="fas fa-download"></i> Save
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-8 mb-4 text-center">
+        <p class="text-white/70 text-sm font-light tracking-wider drop-shadow-md">
+            &copy; 2026 By <span class="font-semibold text-white">Adiatma</span>
+        </p>
+    </footer>
+
+    <script>
+        // DOM Elements
+        const modeSelect = document.getElementById('modeSelect');
+        const qualitySelect = document.getElementById('qualitySelect');
+        const livePreview = document.getElementById('livePreview');
+        const audioVisualizer = document.getElementById('audioVisualizer');
+        const idleState = document.getElementById('idleState');
+        const recordingIndicator = document.getElementById('recordingIndicator');
+        const resultArea = document.getElementById('resultArea');
+        const resultVideo = document.getElementById('resultVideo');
+        const resultAudio = document.getElementById('resultAudio');
+        const resultImage = document.getElementById('resultImage');
+        
+        // Buttons
+        const btnStart = document.getElementById('btnStart');
+        const btnStop = document.getElementById('btnStop');
+        const btnScreenshot = document.getElementById('btnScreenshot');
+        const btnReset = document.getElementById('btnReset');
+        const btnSave = document.getElementById('btnSave');
+
+        // State Variables
+        let mediaRecorder;
+        let recordedChunks = [];
+        let currentStream = null;
+        let isRecording = false;
+        let finalMediaBlob = null;
+        let currentMediaType = 'video';
+        let finalFileName = '';
+
+        // Start Recording
+        btnStart.addEventListener('click', async () => {
+            const mode = modeSelect.value;
+            const quality = qualitySelect.value;
+            recordedChunks = [];
+            
+            try {
+                if (mode === 'screen') {
+                    const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                    let micStream = null;
+                    try {
+                        micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    } catch (e) {
+                        console.warn("Mikrofon tidak tersedia.");
+                    }
+                    
+                    if (micStream && micStream.getAudioTracks().length > 0) {
+                        currentStream = new MediaStream([
+                            ...screenStream.getVideoTracks(),
+                            ...micStream.getAudioTracks()
+                        ]);
+                    } else {
+                        currentStream = screenStream;
+                    }
+                    currentMediaType = 'video';
+
+                } else if (mode === 'camera') {
+                    // Konfigurasi resolusi kamera berdasarkan kualitas
+                    let videoConstraints = true;
+                    if(quality === 'high') videoConstraints = { width: { ideal: 1920 }, height: { ideal: 1080 } };
+                    if(quality === 'low') videoConstraints = { width: { ideal: 640 }, height: { ideal: 480 } };
+
+                    currentStream = await navigator.mediaDevices.getUserMedia({ 
+                        video: videoConstraints, 
+                        audio: true 
+                    });
+                    currentMediaType = 'video';
+                } else if (mode === 'audio') {
+                    currentStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    currentMediaType = 'audio';
+                }
+
+                setupLivePreview(mode);
+                startMediaRecorder(quality);
+
+            } catch (err) {
+                console.error("Akses media ditolak/gagal:", err);
+                alert("Gagal mengakses perangkat. Pastikan izin kamera/mic diberikan.\n\nDetail: " + err.message);
+            }
+        });
+
+        function setupLivePreview(mode) {
+            idleState.classList.add('hidden');
+            resultArea.classList.add('hidden');
+            
+            if (mode === 'audio') {
+                livePreview.classList.add('hidden');
+                audioVisualizer.classList.remove('hidden');
+                btnScreenshot.disabled = true;
+            } else {
+                livePreview.srcObject = currentStream;
+                livePreview.classList.remove('hidden');
+                audioVisualizer.classList.add('hidden');
+                btnScreenshot.disabled = false;
+            }
+
+            btnStart.disabled = true;
+            btnStop.disabled = false;
+            modeSelect.disabled = true;
+            qualitySelect.disabled = true;
+        }
+
+        function startMediaRecorder(quality) {
+            let videoBitsPerSecond;
+            switch(quality) {
+                case 'high': videoBitsPerSecond = 8000000; break; // 8 Mbps
+                case 'medium': videoBitsPerSecond = 3000000; break; // 3 Mbps
+                case 'low': videoBitsPerSecond = 1000000; break; // 1 Mbps
+                default: videoBitsPerSecond = 3000000;
+            }
+
+            const options = {
+                mimeType: currentMediaType === 'video' ? 'video/webm;codecs=vp9,opus' : 'audio/webm;codecs=opus'
+            };
+
+            if (currentMediaType === 'video') options.videoBitsPerSecond = videoBitsPerSecond;
+
+            if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                options.mimeType = currentMediaType === 'video' ? 'video/mp4' : 'audio/mp4';
+                if (!MediaRecorder.isTypeSupported(options.mimeType)) options.mimeType = ''; 
+            }
+
+            try {
+                mediaRecorder = new MediaRecorder(currentStream, options);
+            } catch(e) {
+                mediaRecorder = new MediaRecorder(currentStream);
+            }
+
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data && e.data.size > 0) recordedChunks.push(e.data);
+            };
+
+            mediaRecorder.onstop = processRecordedMedia;
+
+            if (currentMediaType === 'video') {
+                currentStream.getVideoTracks()[0].onended = () => {
+                    if (isRecording) btnStop.click();
+                };
+            }
+
+            mediaRecorder.start();
+            isRecording = true;
+            recordingIndicator.classList.remove('hidden');
+        }
+
+        btnStop.addEventListener('click', () => {
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+                isRecording = false;
+                recordingIndicator.classList.add('hidden');
+                
+                if (currentStream) {
+                    currentStream.getTracks().forEach(track => track.stop());
+                }
+
+                btnStart.disabled = false;
+                btnStop.disabled = true;
+                modeSelect.disabled = false;
+                qualitySelect.disabled = false;
+                btnScreenshot.disabled = true;
+            }
+        });
+
+        function processRecordedMedia() {
+            finalMediaBlob = new Blob(recordedChunks, {
+                type: mediaRecorder.mimeType || (currentMediaType === 'video' ? 'video/webm' : 'audio/webm')
+            });
+            
+            const mediaUrl = URL.createObjectURL(finalMediaBlob);
+            const dateStr = new Date().toISOString().slice(0,19).replace(/:/g, '-');
+            const ext = mediaRecorder.mimeType.includes('mp4') ? 'mp4' : 'webm';
+            finalFileName = `Adiatma_${currentMediaType}_${dateStr}.${ext}`;
+
+            livePreview.srcObject = null;
+            livePreview.classList.add('hidden');
+            audioVisualizer.classList.add('hidden');
+            idleState.classList.remove('hidden');
+
+            resultArea.classList.remove('hidden');
+            hideAllResultElements();
+
+            if (currentMediaType === 'video') {
+                resultVideo.src = mediaUrl;
+                resultVideo.classList.remove('hidden');
+            } else {
+                resultAudio.src = mediaUrl;
+                resultAudio.classList.remove('hidden');
+            }
+        }
+
+        // Tangkap Layar
+        btnScreenshot.addEventListener('click', () => {
+            if (currentMediaType !== 'video' || !currentStream) return;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = livePreview.videoWidth;
+            canvas.height = livePreview.videoHeight;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(livePreview, 0, 0, canvas.width, canvas.height);
+            
+            const imageUrl = canvas.toDataURL('image/png');
+            
+            fetch(imageUrl)
+                .then(res => res.blob())
+                .then(blob => {
+                    finalMediaBlob = blob;
+                    currentMediaType = 'image';
+                    const dateStr = new Date().toISOString().slice(0,19).replace(/:/g, '-');
+                    finalFileName = `Adiatma_Screenshot_${dateStr}.png`;
+                    
+                    resultArea.classList.remove('hidden');
+                    hideAllResultElements();
+                    resultImage.src = imageUrl;
+                    resultImage.classList.remove('hidden');
+
+                    // Efek Flash
+                    livePreview.style.filter = "brightness(2)";
+                    setTimeout(() => livePreview.style.filter = "none", 150);
+                });
+        });
+
+        function hideAllResultElements() {
+            resultVideo.classList.add('hidden');
+            resultAudio.classList.add('hidden');
+            resultImage.classList.add('hidden');
+            resultVideo.pause();
+            resultAudio.pause();
+        }
+
+        // Reset
+        btnReset.addEventListener('click', () => {
+            if (resultVideo.src) URL.revokeObjectURL(resultVideo.src);
+            if (resultAudio.src) URL.revokeObjectURL(resultAudio.src);
+            
+            hideAllResultElements();
+            resultArea.classList.add('hidden');
+            finalMediaBlob = null;
+            finalFileName = '';
+            
+            // Animasi kecil saat reset
+            btnReset.querySelector('i').classList.add('fa-spin');
+            setTimeout(() => btnReset.querySelector('i').classList.remove('fa-spin'), 500);
+        });
+
+        // Save / Download
+        btnSave.addEventListener('click', () => {
+            if (!finalMediaBlob) return;
+
+            const url = URL.createObjectURL(finalMediaBlob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = finalFileName;
+            
+            document.body.appendChild(a);
+            a.click();
+            
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 100);
+        });
+
+        modeSelect.addEventListener('change', (e) => {
+            if (e.target.value === 'audio') {
+                btnScreenshot.disabled = true;
+            }
+        });
+    </script>
+</body>
+</html>
